@@ -32,5 +32,5 @@ backend firehose
   option httpchk GET /firehose-healthcheck
   option forwardfor header X-Client
   {{range $server := .firehose_upstream}}
-  server {{$server.Key}} {{$server.Value}} maxconn 8000 check inter 10s;
+  server {{Base $server.Key}} {{$server.Value}} maxconn 8000 check inter 10s;
   {{end}}
