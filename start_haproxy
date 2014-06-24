@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+readonly ETCD_PORT=${ETCD_PORT:-4001}
+readonly ETCD_IP=${ETCD_IP:-172.17.42.1}
+readonly ETCD=$ETCD_IP:$ETCD_PORT
+readonly HAPROXY_PID="/var/run/haproxy.pid"
+readonly HAPROXY_CFG="/etc/haproxy/haproxy.cfg"
+
+start_haproxy() {
+  haproxy -f $HAPROXY_CFG -db &
+  local pid=$!
+  echo "$pid" > $HAPROXY_PID
+}
+
+start() {
+  start_haproxy
+  confd -verbose -interval 30 -node $ETCD -config-file /etc/confd/conf.d/firehose-haproxy.toml
+}
+
+start

@@ -1,0 +1,36 @@
+global
+  chroot /var/lib/haproxy
+  user haproxy
+  group haproxy
+  maxconn 8192
+
+defaults
+  mode http
+  timeout connect 20s
+  timeout client 1m
+  timeout server 2m
+  timeout tunnel 5m
+  timeout client-fin 30s
+
+listen stats
+  bind *:80
+  stats enable
+  stats uri /haproxy-stats
+  stats refresh 5s
+
+frontend all
+  bind *:80
+  default_backend firehose
+  monitor-uri /haproxy-healthcheck
+  acl is_websocket hdr(Upgrade) -i WebSocket
+  use_backend firehose if is_websocket
+  option forwardfor except 127.0.0.1
+
+backend firehose
+  balance leastconn
+  timeout queue 5000
+  option httpchk GET /firehose-healthcheck
+  option forwardfor header X-Client
+  {{range $server := .firehose_upstream}}
+  server {{$server.Key}} {{$server.Value}} maxconn 8000 check inter 10s;
+  {{end}}

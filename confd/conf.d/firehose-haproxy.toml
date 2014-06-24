@@ -1,0 +1,10 @@
+[template]
+keys = [
+  "firehose/upstream"
+]
+owner = "root"
+mode = "0644"
+src = "firehose-haproxy.tmpl"
+dest = "/etc/haproxy/haproxy.cfg"
+check_cmd  = "/usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -c"
+reload_cmd = "eval 'haproxy -f /etc/haproxy/haproxy.cfg -db -sf $(< /var/run/haproxy.pid) &'; echo $! > /var/run/haproxy.pid"
