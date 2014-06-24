@@ -2,7 +2,7 @@ global
   chroot /var/lib/haproxy
   user haproxy
   group haproxy
-  maxconn 8192
+  maxconn 24576
 
 defaults
   mode http
@@ -15,11 +15,12 @@ defaults
 listen stats
   bind *:8080
   stats enable
+  stats admin if TRUE
   stats uri /haproxy-stats
-  stats refresh 5s
 
 frontend all
   bind *:80
+  maxconn 24000
   default_backend firehose
   monitor-uri /haproxy-healthcheck
   acl is_websocket hdr(Upgrade) -i WebSocket
