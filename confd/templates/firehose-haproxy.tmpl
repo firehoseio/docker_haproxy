@@ -17,21 +17,22 @@ listen stats
   stats enable
   stats admin if TRUE
   stats uri /haproxy-stats
+  acl site_dead nbsrv(firehose) lt 1
+  monitor-uri /haproxy-healthcheck
+  monitor fail if site_dead
 
-frontend all
+frontend firehose
   bind *:80
   maxconn 24000
   default_backend firehose
-  monitor-uri /haproxy-healthcheck
-  acl is_websocket hdr(Upgrade) -i WebSocket
-  use_backend firehose if is_websocket
   option forwardfor except 127.0.0.1
 
 backend firehose
+  fullconn 9000
   balance leastconn
   timeout queue 5000
   option httpchk GET /firehose-healthcheck
   option forwardfor header X-Client
-  {{range $server := .firehose_upstream}}
-  server {{Base $server.Key}} {{$server.Value}} maxconn 8000 check inter 10s;
+  {{range gets "/firehose/upstream/*"}}
+  server {{base .Key}} {{.Value}} maxconn 3000 check inter 10s;
   {{end}}

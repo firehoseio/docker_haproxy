@@ -9,7 +9,7 @@ RUN echo "deb http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main" >
 RUN apt-get update -q
 RUN apt-get install -y -q haproxy curl
 
-ADD https://github.com/kelseyhightower/confd/releases/download/v0.4.1/confd-0.4.1-linux-amd64 /usr/local/bin/confd
+ADD https://github.com/kelseyhightower/confd/releases/download/v0.6.0-alpha3/confd-0.6.0-alpha3-linux-amd64 /usr/local/bin/confd
 ADD confd /etc/confd
 ADD start_haproxy /usr/local/bin/start_haproxy
 
