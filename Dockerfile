@@ -7,7 +7,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 505d97a41c61b9cd
 RUN echo "deb http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main" > /etc/apt/sources.list.d/haproxy.list
 
 RUN apt-get update -q
-RUN apt-get install -y -q haproxy curl
+RUN apt-get install -y -q haproxy
 
 ADD https://github.com/kelseyhightower/confd/releases/download/v0.6.0-alpha3/confd-0.6.0-alpha3-linux-amd64 /usr/local/bin/confd
 ADD confd /etc/confd
