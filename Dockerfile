@@ -7,7 +7,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 505d97a41c61b9cd \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD https://github.com/kelseyhightower/confd/releases/download/v0.6.0-alpha3/confd-0.6.0-alpha3-linux-amd64 /usr/local/bin/confd
+ADD https://github.com/kelseyhightower/confd/releases/download/v0.6.0-alpha2/confd-0.6.0-alpha2-linux-amd64 /usr/local/bin/confd
 ADD confd /etc/confd
 ADD start_haproxy /usr/local/bin/start_haproxy
 
