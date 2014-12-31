@@ -1,10 +1,10 @@
 [template]
 keys = [
-  "firehose/upstream"
+  "/firehose"
 ]
 owner = "root"
 mode = "0644"
 src = "firehose-haproxy.tmpl"
 dest = "/etc/haproxy/haproxy.cfg"
 check_cmd  = "/usr/sbin/haproxy -f {{ .src }} -c"
-reload_cmd = "/bin/bash -c 'eval \"haproxy -f /etc/haproxy/haproxy.cfg -db -sf $(< /var/run/haproxy.pid) &\"; echo $! > /var/run/haproxy.pid'"
+reload_cmd = "/usr/bin/pkill -SIGUSR2 ^haproxy-systemd.*"

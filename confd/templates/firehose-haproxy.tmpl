@@ -3,6 +3,11 @@ global
   user haproxy
   group haproxy
   maxconn 24576
+  daemon
+  {{if exists "/firehose/syslog_endpoint"}}
+  log {{getv "/firehose/syslog_endpoint"}} local0 warning
+  log-send-hostname
+  {{end}}
 
 defaults
   mode http
@@ -11,6 +16,9 @@ defaults
   timeout server 2m
   timeout tunnel 5m
   timeout client-fin 30s
+  {{if exists "/firehose/syslog_endpoint"}}
+  log global
+  {{end}}
 
 listen stats
   bind *:8080
@@ -22,17 +30,26 @@ listen stats
   monitor fail if site_dead
 
 frontend firehose
-  bind *:80
+  bind *:80 {{if exists "/firehose/accept_proxy"}}accept-proxy{{end}}
   maxconn 24000
   default_backend firehose
   option forwardfor except 127.0.0.1
+  {{if exists "/firehose/put_allow"}}
+  acl publishers src{{range getvs "/firehose/put_allow"}} {{.}}{{end}}
+  acl put method PUT
+  acl get method GET or method OPTIONS or method HEAD
+  http-request allow if publishers put
+  http-request deny unless get
+  {{end}}
 
 backend firehose
   fullconn 9000
   balance leastconn
   timeout queue 5000
-  option httpchk GET /firehose-healthcheck
+  {{if exists "/firehose/healthcheck_path"}}
+  option httpchk GET {{getv "/firehose/healthcheck_path" }}
+  {{end}}
   option forwardfor header X-Client
-  {{range gets "/firehose/upstream/*"}}
+  {{range gets "/firehose/services/rainbows/*"}}
   server {{base .Key}} {{.Value}} maxconn 3000 check inter 10s;
   {{end}}
