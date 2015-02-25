@@ -4,9 +4,11 @@ global
   group haproxy
   maxconn 24576
   daemon
-  {{if exists "/firehose/syslog_endpoint"}}
-  log {{getv "/firehose/syslog_endpoint"}} local0 warning
+  {{with $syslog := key "service/firehose/syslog_endpoint"}}
+  {{if ne $syslog ""}}
+  log {{$syslog}} local0 warning
   log-send-hostname
+  {{end}}
   {{end}}
 
 defaults
@@ -16,8 +18,10 @@ defaults
   timeout server 2m
   timeout tunnel 5m
   timeout client-fin 30s
-  {{if exists "/firehose/syslog_endpoint"}}
+  {{with $syslog := key "service/firehose/syslog_endpoint"}}
+  {{if ne $syslog ""}}
   log global
+  {{end}}
   {{end}}
 
 listen stats
@@ -30,26 +34,29 @@ listen stats
   monitor fail if site_dead
 
 frontend firehose
-  bind *:80 {{if exists "/firehose/accept_proxy"}}accept-proxy{{end}}
+  bind *:80 {{with $proxy := key "service/firehose/accept_proxy"}}{{if ne $proxy ""}}accept-proxy{{end}}{{end}}
   maxconn 24000
   default_backend firehose
   option forwardfor except 127.0.0.1
-  {{if exists "/firehose/put_allow"}}
-  acl publishers src{{range getvs "/firehose/put_allow"}} {{.}}{{end}}
+  {{with $put_allow := ls "service/firehose/put_allow"}}
+  {{if ne $put_allow ""}}
+  acl publishers src{{range $put_allow}} {{.}}{{end}}
   acl put method PUT
   acl get method GET or method OPTIONS or method HEAD
   http-request allow if publishers put
   http-request deny unless get
+  {{end}}
   {{end}}
 
 backend firehose
   fullconn 9000
   balance leastconn
   timeout queue 5000
-  {{if exists "/firehose/healthcheck_path"}}
-  option httpchk GET {{getv "/firehose/healthcheck_path" }}
+  {{with $healthcheck := key "service/firehose/healthcheck_path"}}
+  {{if ne $healthcheck ""}}
+  option httpchk GET {{$healthcheck}}
+  {{end}}
   {{end}}
   option forwardfor header X-Client
-  {{range gets "/firehose/services/rainbows/*"}}
-  server {{base .Key}} {{.Value}} maxconn 3000 check inter 10s;
-  {{end}}
+  {{range service "firehose"}}
+  server {{.Node}} {{.Address}}:{{.Port}} maxconn 3000 check inter 10s;{{end}}
