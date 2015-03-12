@@ -38,7 +38,7 @@ frontend firehose
   acl put method PUT
   acl get method GET or method OPTIONS or method HEAD
   http-request allow if publishers put
-  http-request deny unless get
+  http-request allow if get
   http-request deny
 
 backend firehose
