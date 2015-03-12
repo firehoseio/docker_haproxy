@@ -34,7 +34,7 @@ frontend firehose
   maxconn 24000
   default_backend firehose
   option forwardfor except 127.0.0.1
-  acl publishers src {{range getvs "/firehose/put_allow"}}{{.}} {{end}}
+  acl publishers src {{range getvs "/firehose/put_allow/*"}}{{.}} {{end}}
   acl put method PUT
   acl get method GET or method OPTIONS or method HEAD
   http-request deny unless publishers put
