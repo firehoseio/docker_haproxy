@@ -37,8 +37,9 @@ frontend firehose
   acl publishers src {{range getvs "/firehose/put_allow/*"}}{{.}} {{end}}
   acl put method PUT
   acl get method GET or method OPTIONS or method HEAD
-  http-request deny unless publishers put
+  http-request allow if publishers put
   http-request deny unless get
+  http-request deny
 
 backend firehose
   fullconn 9000
