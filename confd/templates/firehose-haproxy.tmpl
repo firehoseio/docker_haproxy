@@ -37,8 +37,10 @@ frontend firehose
   acl publishers src {{range getvs "/firehose/put_allow/*"}}{{.}} {{end}}
   acl put method PUT
   acl get method GET or method OPTIONS or method HEAD
+  acl post method POST
   http-request allow if publishers put
   http-request allow if get
+  http-request allow if post
   http-request deny
 
 backend firehose
